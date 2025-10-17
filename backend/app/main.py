@@ -30,36 +30,6 @@ app.add_middleware(
 def on_startup():
     # Create tables
     Base.metadata.create_all(bind=engine)
-    # Seed initial admin and a sample dataset if not present
-    from sqlalchemy.orm import Session
-    from .db import SessionLocal
-
-    db: Session = SessionLocal()
-    try:
-        admin = db.query(User).filter(User.email == settings.INITIAL_ADMIN_EMAIL).first()
-        if not admin:
-            admin = User(
-                email=settings.INITIAL_ADMIN_EMAIL,
-                full_name="Administrator",
-                hashed_password=hash_password(settings.INITIAL_ADMIN_PASSWORD),
-                is_active=True,
-                is_admin=True,
-            )
-            db.add(admin)
-            db.commit()
-        # Ensure at least one dataset exists
-        ds = db.execute("SELECT id FROM datasets LIMIT 1").fetchone()
-        if ds is None:
-            dataset = Dataset(key="sample", name="Sample Dataset", description="Seed dataset")
-            db.add(dataset)
-            db.commit()
-            # Grant admin access explicitly (not required since admin bypasses, but tidy)
-            db.refresh(dataset)
-            db.refresh(admin)
-            db.add(UserDatasetAccess(user_id=admin.id, dataset_id=dataset.id))
-            db.commit()
-    finally:
-        db.close()
 
 
 app.include_router(auth_router.router)

@@ -42,8 +42,9 @@ class UserUpdate(BaseModel):
 class UserOut(UserBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        'from_attributes': True
+    }
 
 
 # Datasets
@@ -61,8 +62,9 @@ class DatasetCreate(DatasetBase):
 class DatasetOut(DatasetBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        'from_attributes': True
+    }
 
 
 # Metrics
@@ -81,8 +83,9 @@ class MetricRecordCreate(MetricRecordBase):
 class MetricRecordOut(MetricRecordBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        'from_attributes': True
+    }
 
 
 class MetricsSummaryPoint(BaseModel):
