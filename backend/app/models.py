@@ -59,7 +59,7 @@ class Dataset(Base):
 
     metrics: Mapped[list["MetricRecord"]] = relationship(back_populates="dataset", cascade="all, delete-orphan")
     user_access: Mapped[list["UserDatasetAccess"]] = relationship(back_populates="dataset", cascade="all, delete-orphan")
-
+    rules: Mapped[list["QualityRule"]] = relationship(back_populates="dataset", cascade="all, delete-orphan")
 
 class UserDatasetAccess(Base):
     __tablename__ = "user_dataset_access"
@@ -84,6 +84,21 @@ class MetricRecord(Base):
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True, nullable=False)
 
     dataset: Mapped[Dataset] = relationship(back_populates="metrics")
+class QualityRule(Base):
+    __tablename__ = "quality_rules"
+    __table_args__ = (UniqueConstraint("dataset_id", "name", name="uq_rule_dataset_name"),)
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dataset_id: Mapped[int] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    sql_query: Mapped[str] = mapped_column(Text, nullable=False)
+    dimension: Mapped[DimensionEnum | None] = mapped_column(Enum(DimensionEnum), nullable=True)
+    threshold_min: Mapped[float | None] = mapped_column(Float, nullable=True)
+    threshold_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+
+    dataset: Mapped[Dataset] = relationship(back_populates="rules")
 
 Index("ix_metrics_dataset_dimension_time", MetricRecord.dataset_id, MetricRecord.dimension, MetricRecord.recorded_at)
