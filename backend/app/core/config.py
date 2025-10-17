@@ -7,6 +7,7 @@ from typing import List
 
 class Settings:
     # Database
+    DATABASE_URL_ENV: str | None = os.getenv("DATABASE_URL")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "db")
     POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "appuser")
@@ -15,6 +16,8 @@ class Settings:
 
     @property
     def DATABASE_URL(self) -> str:
+        if self.DATABASE_URL_ENV:
+            return self.DATABASE_URL_ENV
         return (
             f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
